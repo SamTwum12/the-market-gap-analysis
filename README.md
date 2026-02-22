@@ -5,7 +5,7 @@ This market analysis of the Open Food Facts dataset (500,000 products) reveals a
 ## B. Project Links
 * **Notebook:** The full analysis code, PDF, and HTML reports can be found in the [Google Colab](https://colab.research.google.com/drive/1JNyB5uQTvgXfOr8pP0UaUA3NEi2Q5pfo?usp=sharing).
 * **Dashboard:** [Interactive Streamlit Dashboard](https://sugartrap-analysis-icgmjhqjqyimkaqxrhkrie.streamlit.app/)
-* **Presentation:** [Link to Slides (PDF/PPT)]()
+* **Presentation:** [Link to Slides (PDF/PPT)](https://drive.google.com/file/d/1p7QEoHxJN_CFfurw8OvIrIEPSJR9rpTD/view?usp=sharing)
 
 ## C. Technical Explanation
 
