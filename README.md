@@ -12,7 +12,9 @@ This market analysis of the Open Food Facts dataset (500,000 products) reveals a
 ### Data Cleaning Strategy
 The cleaning process followed three main steps to produce a reliable dataset for analysis.
 Step 1 – Dropping Missing Values: Rows were removed where product_name, sugars_100g, or proteins_100g were null, since these fields are essential for the scatter plot analysis. This brought the dataset down to ~400,000 rows.
+
 Step 2 – Removing Biologically Impossible Values: Any nutrient value outside the range [0, 100] per 100g of food was filtered out, since no single nutrient can physically exceed the total weight of the food. This was applied across seven nutrient columns (sugars, proteins, fat, fiber, saturated fat, salt, carbohydrates). An additional energy sanity check capped energy-kcal_100g at 900 kcal, the theoretical maximum for pure fat. Combined, these filters removed roughly 15,000+ rows.
+
 Step 3 – Trimming Extreme Outliers: Values above the 99th percentile for both sugar and protein were removed to reduce the influence of extreme edge cases (like near-pure sugar products) on clustering and visualization, without discarding biologically valid data.
 Final result: A clean dataset of ~384,000–391,000 rows (slight variation depending on pipeline order), ready for exploratory analysis. 
 
