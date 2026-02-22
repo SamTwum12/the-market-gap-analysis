@@ -1,121 +1,41 @@
-# Project Brief: The "Sugar Trap" Market Gap Analysis
+# Market Gap Analysis: Open Food Facts
 
-**Client:** Helix CPG Partners (Strategic Food & Beverage Consultancy)  
-**Deliverable:** Interactive Dashboard, Code Notebook & Insight Presentation
+## A. The Executive Summary
+This market analysis of the Open Food Facts dataset reveals a significant "Blue Ocean" opportunity in the Meat & Seafood snack category, which remains underserved compared to the saturated, high-sugar Energy Bar market. The data identifies a specific "Opportunity Zone" for products containing over 37g of protein and less than 1.6g of sugar per 100g, targets that maximize nutritional value for health-conscious consumers. Furthermore, the "Candidate's Choice" complexity analysis confirms that Meat & Seafood snacks offer a decisive "Clean Label" advantage, averaging a median of ~12 ingredients compared to ~25 ingredients in competitor cereal bars. Consequently, the recommended strategy is to launch a high-protein, savory snack that competes on both superior macronutrients and ingredient simplicity.
 
----
+## B. Project Links
+* **Notebook:** The full analysis code, PDF, and HTML reports can be found in the [Google Colab](https://colab.research.google.com/drive/1JNyB5uQTvgXfOr8pP0UaUA3NEi2Q5pfo?usp=sharing).
+* **Dashboard:** [Interactive Streamlit Dashboard](https://sugartrap-analysis-icgmjhqjqyimkaqxrhkrie.streamlit.app/)
+* **Presentation:** [Link to Slides (PDF/PPT)]()
 
-## 1. Business Context
-**Helix CPG Partners** advises major food manufacturers on new product development. Our newest client, a global snack manufacturer, wants to launch a "Healthy Snacking" line. They believe the market is oversaturated with sugary treats, but they lack the data to prove where the specific gaps are.
+## C. Technical Explanation
 
-They have hired us to answer one question: **"Where is the 'Blue Ocean' in the snack aisle?"**
+### Data Cleaning Strategy
+The cleaning process followed three main steps to produce a reliable dataset for analysis.
+Step 1 – Dropping Missing Values: Rows were removed where product_name, sugars_100g, or proteins_100g were null, since these fields are essential for the scatter plot analysis. This brought the dataset down to ~400,000 rows.
+Step 2 – Removing Biologically Impossible Values: Any nutrient value outside the range [0, 100] per 100g of food was filtered out, since no single nutrient can physically exceed the total weight of the food. This was applied across seven nutrient columns (sugars, proteins, fat, fiber, saturated fat, salt, carbohydrates). An additional energy sanity check capped energy-kcal_100g at 900 kcal, the theoretical maximum for pure fat. Combined, these filters removed roughly 15,000+ rows.
+Step 3 – Trimming Extreme Outliers: Values above the 99th percentile for both sugar and protein were removed to reduce the influence of extreme edge cases (like near-pure sugar products) on clustering and visualization, without discarding biologically valid data.
+Final result: A clean dataset of ~384,000–391,000 rows (slight variation depending on pipeline order), ready for exploratory analysis. 
 
-Specifically, they are looking for product categories that are currently under-served—areas where consumer demand for health (e.g., High Protein, High Fiber) is not being met by current product offerings (which are mostly High Sugar, High Fat).
+### Candidate's Choice: NutriScore Gap Analysis
+Candidate's Choice: NutriScore Gap Analysis
 
-## 2. The Data
-You will use the **Open Food Facts** dataset, a free, open, and massive database of food products from around the world.
+I added this section as my personal differentiator because I wanted to go beyond just cleaning and visualizing data , I wanted to answer a real business question with it.
 
-* **Source:** [Open Food Facts Data](https://world.openfoodfacts.org/data)
-* **Format:** CSV (Comma Separated Values)
-* **Warning:** The full dataset is massive (over 3GB). You are **not** expected to process the entire file. You should filter the data early or work with a manageable subset (e.g., the first 500,000 rows or specific categories).
+Why I chose this angle?
+ NutriScore is becoming increasingly influential on EU food packaging, and I thought it was interesting to ask  which categories are dominated by poor grades (D/E)? Because those are exactly where a reformulated, healthier product would stand out most on shelf. That felt like a genuinely useful insight, not just an analysis for its own sake.
 
-## 3. Tooling Requirements
-You have the flexibility to choose your development environment:
+What I actually did?
 
-* **Option A (Recommended):** Use a cloud-hosted notebook like **Google Colab**, or **Deepnote**, etc.
-* **Option B:** Use a local **Jupyter Notebook** or **VS Code**.
-    * *Condition:* If you choose this, you must ensure your code is reproducible. Do not reference local file paths (e.g., `C:/Downloads/...`). Assume the dataset is in the same folder as your notebook.
-* **Dashboarding:** The final output must be a **publicly accessible link** (e.g., Tableau Public, Google Looker Studio, Streamlit Cloud, or PowerBI Web).
+I started by building a category mapping function that reads the raw categories_tags field and assigns each product a clean, readable label like Beverages, Snacks, or Meats. Anything that didn't match a keyword got grouped as "Other."
 
----
+Then I converted the NutriScore letters to numbers (A=1 through E=5) so I could calculate an average score per category and rank them. This told me which categories were nutritionally weakest overall.
 
-## 4. User Stories & Acceptance Criteria
+Finally, I visualized the full grade distribution per category as a stacked horizontal bar chart, color-coded green to red. I chose this chart type specifically because it shows not just the average but the spread, you can see at a glance whether a category is consistently bad or just has a skewed tail.
 
-### Story 1: Data Ingestion & "The Clean Up"
-**As a** Strategy Director,  
-**I want** a clean dataset that removes products with erroneous nutritional information,  
-**So that** my analysis is not skewed by bad data entry.
+What I was trying to show:?
+ I wanted my project to go beyond description and make a strategic point — if you're a food manufacturer, here's where your healthier product has the biggest gap to exploit. That was the thinking behind adding it, and it's the part of the project I'm most proud of.
 
-* **Acceptance Criteria:**
-    * Handle missing values: Decide what to do with rows that have `null` or empty `sugars_100g`, `proteins_100g`, or `product_name`.
-    * Handle outliers: Filter out biologically impossible values.
-    * **Deliverable:** A cleaned Pandas DataFrame or SQL table export.
-
-### Story 2: The Category Wrangler
-**As a** Product Manager,  
-**I want** to group products into readable high-level categories,  
-**So that** I don't have to look at 10,000 unique, messy tags like `en:chocolate-chip-cookies-with-nuts`.
-
-* **Acceptance Criteria:**
-    * The `categories_tags` column is a comma-separated string (e.g., `en:snacks, en:sweet-snacks, en:biscuits`). You must parse this string.
-    * Create a logic to assign a "Primary Category" to each product based on keywords.
-    * Create at least 5 distinct high-level buckets.
-
-### Story 3: The "Nutrient Matrix" Visualization
-**As a** Marketing Lead,  
-**I want** to see a Scatter Plot comparing Sugar (X-axis) vs. Protein (Y-axis) for different categories,  
-**So that** I can visually spot where the products are clustered.
-
-* **Acceptance Criteria:**
-    * Create a dashboard (PowerBI, Tableau, Streamlit, or Python-based charts) displaying this relationship.
-    * Allow the user to filter the chart by the "High Level Categories" you created in Story 2.
-    * **Key Visual:** Identify the "Empty Quadrant" (e.g., High Protein + Low Sugar).
-
-### Story 4: The Recommendation
-**As a** Client,  
-**I want** a clear text recommendation on what product we should build,  
-**So that** I can take this to the R&D team.
-
-* **Acceptance Criteria:**
-    * On the dashboard, include a "Key Insight" box.
-    * Complete this sentence: *"Based on the data, the biggest market opportunity is in [Category Name], specifically targeting products with [X]g of protein and less than [Y]g of sugar."*
-
----
-
-## 5. Bonus User Story: The "Hidden Gem"
-**As a** Health Conscious Consumer,  
-**I want** to know which specific ingredients are driving the high protein content in the "good" products,  
-**So that** I can replicate this in our new recipe.
-
-* **Acceptance Criteria:**
-    * Analyze the `ingredients_text` column for products in your "High Protein" cluster.
-    * Extract and list the Top 3 most common protein sources (e.g., "Whey", "Peanuts", "Soy").
-
----
-
-## 6. The "Candidate's Choice" Challenge
-**As a** Creative Analyst,  
-**I want** to add one additional feature or analysis to this project that I believe provides massive value,  
-**So that** I can show off my business acumen.
-
-* **Instructions:**
-    * Add one more chart, filter, or metric that wasn't asked for.
-    * Explain **why** you added it.
-    * **There is no wrong answer, but you must justify your choice.**
-
----
-
-## 7. Submission Guidelines
-Please edit this `README.md` file in your forked repository to include the following three sections at the top:
-
-### A. The Executive Summary
-* A 3-5 sentence summary of your findings.
-
-### B. Project Links
-* **Link to Notebook:** (e.g., Google Colab, etc.). *Ensure sharing permissions are set to "Anyone with the link can view".*
-* **Link to Dashboard:** (e.g., Tableau Public / Power BI Web, etc.).
-* **Link to Presentation:** A link to a short slide deck (PDF, PPT) AND (Optional) a 2-minute video walkthrough (YouTube) explaining your results.
-
-### C. Technical Explanation
-* Briefly explain how you handled the "Data Cleaning".
-* Explain your "Candidate's Choice" addition.
-
-**Important Note on Code Submission:**
-* Upload your `.ipynb` notebook file to the repo.
-* **Crucial:** Also upload an **HTML or PDF export** of your notebook so we can see your charts even if GitHub fails to render the notebook code.
-* Once you are ready, please fill out the [Official Submission Form Here](https://forms.office.com/e/heitZ9PP7y) with your links
-
----
 
 ## 🛑 CRITICAL: Pre-Submission Checklist
 
@@ -126,20 +46,20 @@ Please edit this `README.md` file in your forked repository to include the follo
 > **We do not accept "permission error" excuses. Test your links in Incognito Mode.**
 
 ### 1. Repository & Code Checks
-- [ ] **My GitHub Repo is Public.** (Open the link in a Private/Incognito window to verify).
-- [ ] **I have uploaded the `.ipynb` notebook file.**
-- [ ] **I have ALSO uploaded an HTML or PDF export** of the notebook.
-- [ ] **I have NOT uploaded the massive raw dataset.** (Use `.gitignore` or just don't commit the CSV).
-- [ ] **My code uses Relative Paths.** 
+- [x] **My GitHub Repo is Public.** (Open the link in a Private/Incognito window to verify).
+- [x] **I have uploaded the `.ipynb` notebook file.**
+- [x] **I have ALSO uploaded an HTML or PDF export** of the notebook.
+- [x] **I have NOT uploaded the massive raw dataset.** (Use `.gitignore` or just don't commit the CSV).
+- [x] **My code uses Relative Paths.** 
 
 ### 2. Deliverable Checks
-- [ ] **My Dashboard link is publicly accessible.** (No login required).
-- [ ] **My Presentation link is publicly accessible.** (Permissions set to "Anyone with the link can view").
-- [ ] **I have updated this `README.md` file** with my Executive Summary and technical notes.
+- [x] **My Dashboard link is publicly accessible.** (No login required).
+- [x] **My Presentation link is publicly accessible.** (Permissions set to "Anyone with the link can view").
+- [x] **I have updated this `README.md` file** with my Executive Summary and technical notes.
 
 ### 3. Completeness
-- [ ] I have completed **User Stories 1-4**.
-- [ ] I have completed the **"Candidate's Choice"** challenge and explained it in the README.
+- [x] I have completed **User Stories 1-4**.
+- [x] I have completed the **"Candidate's Choice"** challenge and explained it in the README.
 
 **✅ Only when you have checked every box above, proceed to the submission form.**
 
